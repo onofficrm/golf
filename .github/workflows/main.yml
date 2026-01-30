@@ -20,10 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # 에러의 원인이었던 cache 설정을 삭제했습니다.
+          # 캐시 기능을 완전히 제거했습니다. (lock 파일 부재 에러 방지)
 
       - name: Install dependencies
-        # package-lock.json 파일이 없어도 에러 없이 설치하도록 설정합니다.
+        # lock 파일이 없어도 강제로 설치를 진행합니다.
         run: npm install --legacy-peer-deps
 
       - name: Build
