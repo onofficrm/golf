@@ -20,13 +20,15 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # 캐시 기능을 완전히 제거했습니다. (lock 파일 부재 에러 방지)
+          # 아래 줄이 중요합니다. 캐시 기능을 완전히 끕니다.
+          cache: '' 
 
       - name: Install dependencies
-        # lock 파일이 없어도 강제로 설치를 진행합니다.
-        run: npm install --legacy-peer-deps
+        # lock 파일이 없어도 에러 없이 설치를 진행하는 명령어입니다.
+        run: npm install --no-package-lock --legacy-peer-deps
 
       - name: Build
+        # 빌드 과정에서 API Key를 주입합니다.
         run: npm run build
         env:
           GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
