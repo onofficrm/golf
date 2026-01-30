@@ -50,6 +50,13 @@ export interface MarketItem {
   location: string;
 }
 
+export interface Comment {
+  id: string;
+  authorName: string;
+  content: string;
+  date: string;
+}
+
 export interface Post {
   id: string;
   authorId: string;
@@ -58,9 +65,10 @@ export interface Post {
   content: string;
   date: string;
   likes: number;
-  comments: number;
+  comments: number; // Count
   type: 'general' | 'review';
   rating?: number; // Only for reviews
+  replies?: Comment[]; // Actual comment list
 }
 
 export interface ManagerProfile {
