@@ -2,9 +2,9 @@ import React from 'react';
 import { 
   Home, ShoppingBag, MessageCircle, Star, User as UserIcon, 
   MapPin, Calendar, Users, DollarSign, Plus, X, Search, Coins,
-  Sparkles
+  Sparkles, Crown, Timer, Heart, Trophy
 } from 'lucide-react';
-import { ViewState, User, JoinPost, MarketItem, Post, MAX_FREE_JOINS, JOIN_COST_POINTS } from '../types';
+import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, MAX_FREE_JOINS, JOIN_COST_POINTS } from '../types';
 
 // --- Navigation ---
 
@@ -64,15 +64,29 @@ export const Header: React.FC<{ user: User; title: string; onCharge: () => void 
 // --- Cards ---
 
 export const JoinCard: React.FC<{ post: JoinPost; onJoin: (post: JoinPost) => void }> = ({ post, onJoin }) => (
-  <div className="bg-white rounded-xl shadow-sm border border-gray-100 mb-5 overflow-hidden hover:shadow-md transition-shadow">
+  <div className={`bg-white rounded-xl shadow-sm border mb-5 overflow-hidden hover:shadow-md transition-shadow relative ${post.isManager ? 'border-purple-200' : 'border-gray-100'}`}>
+    
+    {/* Badges Overlay */}
+    <div className="absolute top-2 left-2 z-10 flex flex-col gap-1 items-start">
+      {post.isManager && (
+        <span className="bg-purple-600 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide flex items-center gap-1 shadow-sm">
+          <Crown size={10} fill="currentColor" /> 매니저
+        </span>
+      )}
+      {post.isUrgent && (
+        <span className="bg-red-500 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide flex items-center gap-1 shadow-sm animate-pulse">
+          <Timer size={10} /> 마감임박
+        </span>
+      )}
+    </div>
+
     {/* Image Header */}
     <div className="h-32 w-full relative">
       <img src={post.image} alt={post.courseName} className="w-full h-full object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
-      <div className="absolute top-2 left-2 bg-primary-600/90 text-white text-[10px] font-bold px-2 py-1 rounded-full uppercase tracking-wide backdrop-blur-sm">
-        모집중
-      </div>
-      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/60 to-transparent p-3 pt-8">
-        <h3 className="font-bold text-white text-lg line-clamp-1 text-shadow">{post.title}</h3>
+      <div className="absolute bottom-0 inset-x-0 bg-gradient-to-t from-black/70 to-transparent p-3 pt-8">
+        <h3 className="font-bold text-white text-lg line-clamp-1 text-shadow flex items-center gap-2">
+          {post.title}
+        </h3>
       </div>
     </div>
 
@@ -81,7 +95,7 @@ export const JoinCard: React.FC<{ post: JoinPost; onJoin: (post: JoinPost) => vo
         <div className="text-primary-700 font-semibold text-sm flex items-center gap-1">
            <MapPin size={14} /> {post.courseName}
         </div>
-        <span className="text-xs text-gray-400">{post.location} · {post.distance || '5km'}</span>
+        <span className="text-xs text-gray-400">{post.location}</span>
       </div>
 
       <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-sm text-gray-600 mb-4">
@@ -91,7 +105,10 @@ export const JoinCard: React.FC<{ post: JoinPost; onJoin: (post: JoinPost) => vo
         </div>
         <div className="flex items-center gap-2">
           <span className="text-gray-400 font-bold text-xs flex justify-center items-center w-[14px]">₩</span>
-          {post.greenFee.toLocaleString()}만원
+          <span className={post.supportAmount ? "line-through text-gray-400 text-xs mr-1" : ""}>{post.greenFee.toLocaleString()}만원</span>
+          {post.supportAmount && (
+            <span className="text-red-500 font-bold text-xs">(-{(post.supportAmount/10000)}만)</span>
+          )}
         </div>
         <div className="flex items-center gap-2 col-span-2">
           <Users size={14} className="text-gray-400" />
@@ -103,14 +120,40 @@ export const JoinCard: React.FC<{ post: JoinPost; onJoin: (post: JoinPost) => vo
           </div>
           <span className="text-xs">{post.currentPlayers}/{post.maxPlayers} 명</span>
         </div>
+        {post.gender && post.gender !== 'any' && (
+           <div className="col-span-2 text-xs flex items-center gap-1 text-pink-600 bg-pink-50 px-2 py-1 rounded w-fit">
+             <Heart size={10} fill="currentColor" /> 
+             {post.gender === 'female' ? '여성우대' : post.gender === 'couple' ? '커플환영' : '남성'}
+           </div>
+        )}
       </div>
 
       <button 
         onClick={() => onJoin(post)}
-        className="w-full bg-primary-600 text-white py-2.5 rounded-lg font-semibold shadow-sm hover:bg-primary-700 active:bg-primary-800 transition-colors flex justify-center items-center gap-2"
+        className={`w-full text-white py-2.5 rounded-lg font-semibold shadow-sm transition-colors flex justify-center items-center gap-2 ${post.isManager ? 'bg-gradient-to-r from-purple-600 to-primary-600' : 'bg-primary-600 hover:bg-primary-700'}`}
       >
-        조인 신청하기
+        {post.isManager ? '매니저 조인 신청' : '조인 신청하기'}
       </button>
+    </div>
+  </div>
+);
+
+export const ManagerProfileCard: React.FC<{ manager: ManagerProfile }> = ({ manager }) => (
+  <div className="min-w-[140px] bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col items-center">
+    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-100 mb-2">
+      <img src={manager.image} alt={manager.name} className="w-full h-full object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+    </div>
+    <h4 className="font-bold text-sm text-gray-900">{manager.name}</h4>
+    <span className="text-xs text-purple-600 bg-purple-50 px-2 py-0.5 rounded-full mt-1 mb-2 font-medium">
+      {manager.region}
+    </span>
+    <div className="flex items-center gap-1 text-[10px] text-gray-500">
+      <Trophy size={10} className="text-yellow-500" />
+      <span>{manager.joinCount}회 진행</span>
+    </div>
+    <div className="flex items-center gap-1 text-[10px] text-gray-500 mt-0.5">
+       <Star size={10} className="text-yellow-400 fill-yellow-400" />
+       <span>{manager.rating}</span>
     </div>
   </div>
 );
