@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, JOIN_COST_POINTS, MAX_FREE_JOINS, REVIEW_REWARD_POINTS, Comment } from './types';
+import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, TopMember, JOIN_COST_POINTS, MAX_FREE_JOINS, REVIEW_REWARD_POINTS, Comment } from './types';
 import { 
   MobileNavbar, Header, JoinCard, MarketCard, CommunityCard, 
-  Modal, FloatingActionButton, ManagerProfileCard, StarRating
+  Modal, FloatingActionButton, ManagerProfileCard, TopMemberCard, StarRating
 } from './components/Components';
-import { Plus, Search, CheckCircle, Sparkles, MessageCircle, AlertCircle, Crown, Clock, Heart, Send } from 'lucide-react';
+import { Plus, Search, CheckCircle, Sparkles, MessageCircle, AlertCircle, Crown, Clock, Heart, Send, ThumbsUp } from 'lucide-react';
 import { askGolfCoach, generatePostHelp } from './services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -24,6 +24,14 @@ const INITIAL_MANAGERS: ManagerProfile[] = [
   { id: 'mg2', name: '최실장', region: '경기 북부', joinCount: 85, rating: 4.8, image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=150&auto=format&fit=crop' },
   { id: 'mg3', name: '김프로', region: '인천/서해', joinCount: 210, rating: 5.0, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop' },
   { id: 'mg4', name: '이팀장', region: '강원권', joinCount: 56, rating: 4.7, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop' },
+];
+
+const INITIAL_TOP_MEMBERS: TopMember[] = [
+  { id: 'tm1', name: '스마일골퍼', badge: '😁 분위기 메이커', description: '항상 밝게 웃으며 라운딩해요', avatar: 'https://images.unsplash.com/photo-1527980965255-d3b416303d12?q=80&w=150&auto=format&fit=crop' },
+  { id: 'tm2', name: '매너왕이씨', badge: '🎩 젠틀맨', description: '동반자를 배려하는 매너 최고', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=150&auto=format&fit=crop' },
+  { id: 'tm3', name: '룰마스터', badge: '📏 규칙준수', description: '정확한 룰 적용으로 깔끔하게', avatar: 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?q=80&w=150&auto=format&fit=crop' },
+  { id: 'tm4', name: '장타소녀', badge: '🚀 시원한샷', description: '답답함 없는 시원한 플레이', avatar: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?q=80&w=150&auto=format&fit=crop' },
+  { id: 'tm5', name: '굿샷제조기', badge: '👏 칭찬봇', description: '동반자 기 살려주는 칭찬왕', avatar: 'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?q=80&w=150&auto=format&fit=crop' },
 ];
 
 const INITIAL_JOINS: JoinPost[] = [
@@ -322,6 +330,22 @@ export default function App() {
           <div className="flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar">
             {INITIAL_MANAGERS.map(manager => (
               <ManagerProfileCard key={manager.id} manager={manager} />
+            ))}
+          </div>
+        </div>
+
+        {/* Top Members Section (Horizontal Scroll) */}
+        <div className="mb-6">
+          <div className="px-4 flex justify-between items-center mb-3">
+            <h3 className="font-bold text-gray-900 text-lg tracking-tight flex items-center gap-1">
+              <ThumbsUp size={18} className="text-primary-500 fill-primary-100" />
+              이달의 매너왕
+            </h3>
+            <span className="text-xs text-gray-400">전체보기</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar">
+            {INITIAL_TOP_MEMBERS.map(member => (
+              <TopMemberCard key={member.id} member={member} />
             ))}
           </div>
         </div>
