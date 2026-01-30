@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ViewState, User, JoinPost, MarketItem, Post, JOIN_COST_POINTS, MAX_FREE_JOINS, REVIEW_REWARD_POINTS } from './types';
+import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, JOIN_COST_POINTS, MAX_FREE_JOINS, REVIEW_REWARD_POINTS } from './types';
 import { 
   MobileNavbar, Header, JoinCard, MarketCard, CommunityCard, 
-  Modal, FloatingActionButton 
+  Modal, FloatingActionButton, ManagerProfileCard 
 } from './components/Components';
-import { Plus, Search, CheckCircle, Sparkles, MessageCircle, AlertCircle } from 'lucide-react';
+import { Plus, Search, CheckCircle, Sparkles, MessageCircle, AlertCircle, Crown, Clock, Heart } from 'lucide-react';
 import { askGolfCoach, generatePostHelp } from './services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -13,39 +13,46 @@ import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContai
 const INITIAL_USER: User = {
   id: 'u1',
   name: '김골프',
-  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop', // Verified avatar
+  avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?q=80&w=200&auto=format&fit=crop', 
   points: 1500,
   freeJoinsUsed: 2,
   location: '서울 강남구'
 };
 
+const INITIAL_MANAGERS: ManagerProfile[] = [
+  { id: 'mg1', name: '박매니저', region: '경기 남부', joinCount: 128, rating: 4.9, image: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?q=80&w=150&auto=format&fit=crop' },
+  { id: 'mg2', name: '최실장', region: '경기 북부', joinCount: 85, rating: 4.8, image: 'https://images.unsplash.com/photo-1599566150163-29194dcaad36?q=80&w=150&auto=format&fit=crop' },
+  { id: 'mg3', name: '김프로', region: '인천/서해', joinCount: 210, rating: 5.0, image: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=150&auto=format&fit=crop' },
+  { id: 'mg4', name: '이팀장', region: '강원권', joinCount: 56, rating: 4.7, image: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?q=80&w=150&auto=format&fit=crop' },
+];
+
 const INITIAL_JOINS: JoinPost[] = [
   { 
-    id: 'j1', hostId: 'h1', hostName: '박프로', 
-    title: '스카이72 주말 라운딩 급구', courseName: '스카이72 GC', 
+    id: 'j1', hostId: 'h1', hostName: '박매니저', 
+    title: '[매니저] 스카이72 주말 황금시간', courseName: '스카이72 GC', 
     date: '10월 28일', time: '08:00', greenFee: 25, 
     location: '인천', currentPlayers: 3, maxPlayers: 4, 
-    description: '한 분만 더 모십니다. 명랑 골프 하실 분!', tags: ['주말', '오전'],
-    // Classic Golf Course Green
-    image: 'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=800&auto=format&fit=crop' 
+    description: '검증된 매니저가 진행합니다. 매너 좋으신 분 환영!', tags: ['주말', '오전'],
+    image: 'https://images.unsplash.com/photo-1587174486073-ae5e5cff23aa?q=80&w=800&auto=format&fit=crop',
+    isManager: true, isUrgent: true, gender: 'any'
   },
   { 
     id: 'j2', hostId: 'h2', hostName: '이이글', 
-    title: '평일 새벽반 특가 조인', courseName: '골드 CC', 
-    date: '10월 30일', time: '06:30', greenFee: 18, 
+    title: '내일 새벽 급구! 그린피 지원', courseName: '골드 CC', 
+    date: '내일', time: '06:30', greenFee: 18, 
     location: '용인', currentPlayers: 2, maxPlayers: 4, 
-    description: '매너 게임 하실 분 환영합니다. 내기 없음.', tags: ['평일', '새벽'],
-    // Scenic Course
-    image: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=800&auto=format&fit=crop'
+    description: '갑자기 한 분이 빠지셔서 급하게 구합니다.', tags: ['평일', '새벽'],
+    image: 'https://images.unsplash.com/photo-1535131749006-b7f58c99034b?q=80&w=800&auto=format&fit=crop',
+    isUrgent: true, supportAmount: 30000, gender: 'male'
   },
   { 
-    id: 'j3', hostId: 'h3', hostName: '최버디', 
-    title: '골린이 환영합니다!', courseName: '안성 Q', 
+    id: 'j3', hostId: 'h3', hostName: '최실장', 
+    title: '여성 우대 명랑 골프', courseName: '안성 Q', 
     date: '11월 1일', time: '12:00', greenFee: 20, 
     location: '안성', currentPlayers: 1, maxPlayers: 4, 
-    description: '연습 겸 즐겁게 치실 분 오세요.', tags: ['초보환영', '명랑'],
-    // Golfer putting/green
-    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=800&auto=format&fit=crop'
+    description: '부부 동반이나 여성 골퍼분 환영합니다.', tags: ['초보환영', '명랑'],
+    image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?q=80&w=800&auto=format&fit=crop',
+    isManager: true, gender: 'female'
   },
   { 
     id: 'j4', hostId: 'h4', hostName: '김싱글', 
@@ -53,8 +60,8 @@ const INITIAL_JOINS: JoinPost[] = [
     date: '11월 3일', time: '13:00', greenFee: 28, 
     location: '성남', currentPlayers: 2, maxPlayers: 4, 
     description: '구력 3년 이상, 매너 좋으신 분 모십니다.', tags: ['주말', '오후'],
-    // Wide Fairway
-    image: 'https://images.unsplash.com/photo-1592919505780-30395071d480?q=80&w=800&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1592919505780-30395071d480?q=80&w=800&auto=format&fit=crop',
+    gender: 'any'
   },
   { 
     id: 'j5', hostId: 'h5', hostName: '장타자', 
@@ -62,8 +69,8 @@ const INITIAL_JOINS: JoinPost[] = [
     date: '11월 5일', time: '17:30', greenFee: 15, 
     location: '가평', currentPlayers: 1, maxPlayers: 4, 
     description: '시원하게 야간 치실 분! 끝나고 식사도 해요.', tags: ['야간', '뒷풀이'],
-    // Sunset Golf
-    image: 'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?q=80&w=800&auto=format&fit=crop'
+    image: 'https://images.unsplash.com/photo-1593111774240-d529f12cf4bb?q=80&w=800&auto=format&fit=crop',
+    gender: 'any'
   },
 ];
 
@@ -71,56 +78,48 @@ const INITIAL_MARKET: MarketItem[] = [
   { 
     id: 'm1', sellerId: 's1', sellerName: '타이거', 
     title: '캘러웨이 매버릭 드라이버', price: 250000, 
-    // Golf Club Image
     image: 'https://images.unsplash.com/photo-1591491640784-3232eb748d4b?q=80&w=400&auto=format&fit=crop', 
     category: '클럽', status: 'available', location: '강남구' 
   },
   { 
     id: 'm2', sellerId: 's2', sellerName: '로리', 
     title: '타이틀리스트 Pro V1 (1더즌)', price: 45000, 
-    // Golf Ball Image
     image: 'https://images.unsplash.com/photo-1592659762303-90081d34b277?q=80&w=400&auto=format&fit=crop', 
     category: '용품', status: 'available', location: '서초구' 
   },
   { 
     id: 'm3', sellerId: 's3', sellerName: '스코티', 
     title: '풋조이 골프화 270mm', price: 80000, 
-    // Golf Shoes/Bag Image
     image: 'https://images.unsplash.com/photo-1624637775532-348f3b25754f?q=80&w=400&auto=format&fit=crop', 
     category: '의류', status: 'sold', location: '송파구' 
   },
   { 
     id: 'm4', sellerId: 's4', sellerName: '골프왕', 
     title: '타이틀리스트 경량 스탠드백', price: 180000, 
-    // Golf Bag
     image: 'https://images.unsplash.com/photo-1623567341691-1f46b5e6d634?q=80&w=400&auto=format&fit=crop', 
     category: '용품', status: 'reserved', location: '분당구' 
   },
   { 
     id: 'm5', sellerId: 's5', sellerName: '퍼팅도사', 
     title: '스카티카메론 뉴포트2 34인치', price: 420000, 
-    // Putter / Green
     image: 'https://images.unsplash.com/photo-1591491719560-6f4e3c9d8137?q=80&w=400&auto=format&fit=crop', 
     category: '클럽', status: 'available', location: '판교' 
   },
   { 
     id: 'm6', sellerId: 's6', sellerName: '거리측정', 
     title: '부쉬넬 PRO XE 거리측정기', price: 350000, 
-    // Golf Gadget / Field
     image: 'https://images.unsplash.com/photo-1616259024095-234237140813?q=80&w=400&auto=format&fit=crop', 
     category: '용품', status: 'available', location: '하남' 
   },
   { 
     id: 'm7', sellerId: 's7', sellerName: '숏게임', 
     title: '보키 SM8 웨지 52도, 56도 일괄', price: 200000, 
-    // Clubs
     image: 'https://images.unsplash.com/photo-1535132011086-b8818f016104?q=80&w=400&auto=format&fit=crop', 
     category: '클럽', status: 'sold', location: '강동구' 
   },
   { 
     id: 'm8', sellerId: 's8', sellerName: '패션골퍼', 
     title: '말본 골프 버킷햇 (새상품)', price: 45000, 
-    // Hat
     image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=400&auto=format&fit=crop', 
     category: '의류', status: 'available', location: '용산구' 
   }
@@ -139,12 +138,17 @@ const INITIAL_POSTS: Post[] = [
   { id: 'p10', authorId: 'a10', authorName: '싱글가즈아', title: '가평베네스트 가을 골프 최고네요', content: '단풍 구경 제대로 하고 왔습니다. 코스 관리 상태도 훌륭하고 날씨도 딱 좋았어요.', date: '3일 전', likes: 50, comments: 12, type: 'review', rating: 5 },
 ];
 
+type FilterType = 'ALL' | 'URGENT' | 'MANAGER' | 'FEMALE';
+
 export default function App() {
   const [view, setView] = useState<ViewState>(ViewState.HOME);
   const [user, setUser] = useState<User>(INITIAL_USER);
   const [joins, setJoins] = useState<JoinPost[]>(INITIAL_JOINS);
   const [marketItems, setMarketItems] = useState<MarketItem[]>(INITIAL_MARKET);
   const [posts, setPosts] = useState<Post[]>(INITIAL_POSTS);
+
+  // Home Filters
+  const [filter, setFilter] = useState<FilterType>('ALL');
 
   // Modals State
   const [isJoinModalOpen, setJoinModalOpen] = useState(false);
@@ -238,38 +242,101 @@ export default function App() {
 
   // --- Views ---
 
-  const renderHome = () => (
-    <div className="pb-24 pt-2">
-      <div className="px-4 mb-5">
-        <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-6 text-white shadow-xl shadow-primary-500/20">
-          <h2 className="font-bold text-lg mb-1 tracking-tight">라운딩 파트너 찾기</h2>
-          <p className="text-primary-50 text-sm mb-6 font-light">{user.location} 근처 골퍼들과 함께하세요</p>
-          <div className="flex gap-3">
-             <div className="flex-1 bg-white/20 rounded-xl p-3 text-center backdrop-blur-md border border-white/20">
-                <span className="block text-xl font-bold">{Math.max(0, MAX_FREE_JOINS - user.freeJoinsUsed)}회</span>
-                <span className="text-[10px] text-white opacity-90 uppercase tracking-wider font-semibold">무료 조인</span>
-             </div>
-             <div className="flex-1 bg-white/20 rounded-xl p-3 text-center backdrop-blur-md border border-white/20">
-                <span className="block text-xl font-bold">{user.points.toLocaleString()}</span>
-                <span className="text-[10px] text-white opacity-90 uppercase tracking-wider font-semibold">보유 포인트</span>
-             </div>
+  const renderHome = () => {
+    // Filter Logic
+    const filteredJoins = joins.filter(join => {
+      if (filter === 'URGENT') return join.isUrgent;
+      if (filter === 'MANAGER') return join.isManager;
+      if (filter === 'FEMALE') return join.gender === 'female';
+      return true;
+    });
+
+    return (
+      <div className="pb-24 pt-2">
+        <div className="px-4 mb-5">
+          <div className="bg-gradient-to-br from-primary-600 to-primary-800 rounded-2xl p-6 text-white shadow-xl shadow-primary-500/20">
+            <h2 className="font-bold text-lg mb-1 tracking-tight">라운딩 파트너 찾기</h2>
+            <p className="text-primary-50 text-sm mb-6 font-light">{user.location} 근처 골퍼들과 함께하세요</p>
+            <div className="flex gap-3">
+               <div className="flex-1 bg-white/20 rounded-xl p-3 text-center backdrop-blur-md border border-white/20">
+                  <span className="block text-xl font-bold">{Math.max(0, MAX_FREE_JOINS - user.freeJoinsUsed)}회</span>
+                  <span className="text-[10px] text-white opacity-90 uppercase tracking-wider font-semibold">무료 조인</span>
+               </div>
+               <div className="flex-1 bg-white/20 rounded-xl p-3 text-center backdrop-blur-md border border-white/20">
+                  <span className="block text-xl font-bold">{user.points.toLocaleString()}</span>
+                  <span className="text-[10px] text-white opacity-90 uppercase tracking-wider font-semibold">보유 포인트</span>
+               </div>
+            </div>
           </div>
         </div>
-      </div>
 
-      <div className="px-4 mb-3 flex justify-between items-center">
-        <h3 className="font-bold text-gray-900 text-lg tracking-tight">내 주변 조인 모집</h3>
-        <button className="text-primary-700 text-sm font-semibold bg-white border border-gray-200 px-3 py-1 rounded-full shadow-sm hover:bg-gray-50">필터</button>
+        {/* Manager Section (Horizontal Scroll) */}
+        <div className="mb-6">
+          <div className="px-4 flex justify-between items-center mb-3">
+            <h3 className="font-bold text-gray-900 text-lg tracking-tight flex items-center gap-1">
+              <Crown size={18} className="text-yellow-500 fill-yellow-500" />
+              이달의 우수 매니저
+            </h3>
+            <span className="text-xs text-gray-400">전체보기</span>
+          </div>
+          <div className="flex gap-3 overflow-x-auto px-4 pb-2 no-scrollbar">
+            {INITIAL_MANAGERS.map(manager => (
+              <ManagerProfileCard key={manager.id} manager={manager} />
+            ))}
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="px-4 mb-4">
+          <div className="flex gap-2 overflow-x-auto no-scrollbar pb-1">
+            <button 
+              onClick={() => setFilter('ALL')}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors border ${filter === 'ALL' ? 'bg-gray-900 text-white border-gray-900 font-bold' : 'bg-white text-gray-600 border-gray-200'}`}
+            >
+              전체
+            </button>
+            <button 
+              onClick={() => setFilter('URGENT')}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors border flex items-center gap-1 ${filter === 'URGENT' ? 'bg-red-50 text-red-600 border-red-200 font-bold' : 'bg-white text-gray-600 border-gray-200'}`}
+            >
+              <AlertCircle size={14} /> 임박특가
+            </button>
+            <button 
+              onClick={() => setFilter('MANAGER')}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors border flex items-center gap-1 ${filter === 'MANAGER' ? 'bg-purple-50 text-purple-600 border-purple-200 font-bold' : 'bg-white text-gray-600 border-gray-200'}`}
+            >
+              <Crown size={14} /> 매니저조인
+            </button>
+            <button 
+              onClick={() => setFilter('FEMALE')}
+              className={`px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors border flex items-center gap-1 ${filter === 'FEMALE' ? 'bg-pink-50 text-pink-600 border-pink-200 font-bold' : 'bg-white text-gray-600 border-gray-200'}`}
+            >
+              <Heart size={14} /> 여성우대
+            </button>
+          </div>
+        </div>
+        
+        <div className="px-4 mb-3 flex justify-between items-center">
+          <h3 className="font-bold text-gray-900 text-lg tracking-tight">
+            {filter === 'ALL' ? '내 주변 조인 모집' : filter === 'URGENT' ? '마감 임박 조인' : filter === 'MANAGER' ? '믿고 가는 매니저 조인' : '여성/부부 우대 조인'}
+          </h3>
+        </div>
+        
+        <div className="px-4">
+          {filteredJoins.length > 0 ? (
+            filteredJoins.map(post => (
+              <JoinCard key={post.id} post={post} onJoin={handleJoinRequest} />
+            ))
+          ) : (
+             <div className="text-center py-10 text-gray-400 bg-white rounded-xl border border-gray-100 border-dashed">
+                <p>조건에 맞는 조인이 없습니다.</p>
+             </div>
+          )}
+        </div>
+        <FloatingActionButton onClick={() => alert('조인 모집 기능은 준비중입니다!')} icon={Plus} />
       </div>
-      
-      <div className="px-4">
-        {joins.map(post => (
-          <JoinCard key={post.id} post={post} onJoin={handleJoinRequest} />
-        ))}
-      </div>
-      <FloatingActionButton onClick={() => alert('조인 모집 기능은 준비중입니다!')} icon={Plus} />
-    </div>
-  );
+    );
+  };
 
   const renderMarket = () => (
     <div className="pb-24 pt-2 px-4">
@@ -426,6 +493,11 @@ export default function App() {
                 {user.freeJoinsUsed < MAX_FREE_JOINS ? '무료 (체험)' : `${JOIN_COST_POINTS} 포인트`}
               </span>
             </div>
+            {selectedJoin?.supportAmount && (
+               <div className="bg-green-50 text-green-700 p-2 rounded text-center font-bold mt-2">
+                  🎁 지원금 {selectedJoin.supportAmount.toLocaleString()}원 지급
+               </div>
+            )}
           </div>
           <button 
             onClick={confirmJoin}
