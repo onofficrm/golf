@@ -23,13 +23,19 @@ export interface JoinPost {
   courseName: string;
   date: string;
   time: string;
-  greenFee: number; // Cost
+  greenFee: number; // Cost in 10,000 KRW unit roughly
   location: string;
   currentPlayers: number;
   maxPlayers: number;
   description: string;
   tags: string[];
-  image: string; // Added image field
+  image: string;
+  
+  // New Features inspired by Golmate
+  isManager?: boolean; // Hosted by a verified manager
+  isUrgent?: boolean; // Upcoming date
+  gender?: 'any' | 'male' | 'female' | 'couple';
+  supportAmount?: number; // Cash support in KRW
 }
 
 export interface MarketItem {
@@ -55,6 +61,15 @@ export interface Post {
   comments: number;
   type: 'general' | 'review';
   rating?: number; // Only for reviews
+}
+
+export interface ManagerProfile {
+  id: string;
+  name: string;
+  region: string;
+  joinCount: number;
+  image: string;
+  rating: number;
 }
 
 export const JOIN_COST_POINTS = 100;
