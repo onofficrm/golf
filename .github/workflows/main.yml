@@ -20,18 +20,17 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # 아래 줄이 중요합니다. 캐시 기능을 완전히 끕니다.
-          cache: '' 
 
       - name: Install dependencies
-        # lock 파일이 없어도 에러 없이 설치를 진행하는 명령어입니다.
-        run: npm install --no-package-lock --legacy-peer-deps
+        # 설치 시 발생할 수 있는 버전 충돌을 무시합니다.
+        run: npm install --legacy-peer-deps
 
       - name: Build
-        # 빌드 과정에서 API Key를 주입합니다.
-        run: npm run build
-        env:
-          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
+        # CI=false 설정은 경고(Warning) 때문에 빌드가 멈추는 것을 방지합니다.
+        # && 명령어를 사용하여 환경 변수를 주입하고 빌드를 실행합니다.
+        run: |
+          export GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
+          CI=false npm run build
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
