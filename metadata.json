@@ -1,0 +1,7 @@
+{
+  "name": "당근골프 - 우리동네 골프 조인 & 장터",
+  "description": "가까운 동네 골퍼들과 라운딩 조인, 중고 거래, 커뮤니티를 즐겨보세요.",
+  "requestFramePermissions": [
+    "geolocation"
+  ]
+}
