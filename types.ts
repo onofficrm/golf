@@ -80,6 +80,14 @@ export interface ManagerProfile {
   rating: number;
 }
 
+export interface TopMember {
+  id: string;
+  name: string;
+  avatar: string;
+  badge: string; // e.g., '매너왕', '분위기메이커'
+  description: string;
+}
+
 export const JOIN_COST_POINTS = 100;
 export const MAX_FREE_JOINS = 5;
 export const REVIEW_REWARD_POINTS = 50;
