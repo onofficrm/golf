@@ -89,6 +89,41 @@ const INITIAL_MARKET: MarketItem[] = [
     image: 'https://images.unsplash.com/photo-1624637775532-348f3b25754f?q=80&w=400&auto=format&fit=crop', 
     category: '의류', status: 'sold', location: '송파구' 
   },
+  { 
+    id: 'm4', sellerId: 's4', sellerName: '골프왕', 
+    title: '타이틀리스트 경량 스탠드백', price: 180000, 
+    // Golf Bag
+    image: 'https://images.unsplash.com/photo-1623567341691-1f46b5e6d634?q=80&w=400&auto=format&fit=crop', 
+    category: '용품', status: 'reserved', location: '분당구' 
+  },
+  { 
+    id: 'm5', sellerId: 's5', sellerName: '퍼팅도사', 
+    title: '스카티카메론 뉴포트2 34인치', price: 420000, 
+    // Putter / Green
+    image: 'https://images.unsplash.com/photo-1591491719560-6f4e3c9d8137?q=80&w=400&auto=format&fit=crop', 
+    category: '클럽', status: 'available', location: '판교' 
+  },
+  { 
+    id: 'm6', sellerId: 's6', sellerName: '거리측정', 
+    title: '부쉬넬 PRO XE 거리측정기', price: 350000, 
+    // Golf Gadget / Field
+    image: 'https://images.unsplash.com/photo-1616259024095-234237140813?q=80&w=400&auto=format&fit=crop', 
+    category: '용품', status: 'available', location: '하남' 
+  },
+  { 
+    id: 'm7', sellerId: 's7', sellerName: '숏게임', 
+    title: '보키 SM8 웨지 52도, 56도 일괄', price: 200000, 
+    // Clubs
+    image: 'https://images.unsplash.com/photo-1535132011086-b8818f016104?q=80&w=400&auto=format&fit=crop', 
+    category: '클럽', status: 'sold', location: '강동구' 
+  },
+  { 
+    id: 'm8', sellerId: 's8', sellerName: '패션골퍼', 
+    title: '말본 골프 버킷햇 (새상품)', price: 45000, 
+    // Hat
+    image: 'https://images.unsplash.com/photo-1588850561407-ed78c282e89b?q=80&w=400&auto=format&fit=crop', 
+    category: '의류', status: 'available', location: '용산구' 
+  }
 ];
 
 const INITIAL_POSTS: Post[] = [
