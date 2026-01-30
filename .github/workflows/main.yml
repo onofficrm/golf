@@ -22,15 +22,14 @@ jobs:
           node-version: 20
 
       - name: Install dependencies
-        # 설치 시 발생할 수 있는 버전 충돌을 무시합니다.
+        # 설치 시 발생할 수 있는 버전 충돌을 방지합니다.
         run: npm install --legacy-peer-deps
 
       - name: Build
-        # CI=false 설정은 경고(Warning) 때문에 빌드가 멈추는 것을 방지합니다.
-        # && 명령어를 사용하여 환경 변수를 주입하고 빌드를 실행합니다.
-        run: |
-          export GEMINI_API_KEY=${{ secrets.GEMINI_API_KEY }}
-          CI=false npm run build
+        # CI=false 설정은 경고(Warning) 때문에 빌드가 멈추는 것을 방지하는 마법의 명령어입니다.
+        run: CI=false npm run build
+        env:
+          GEMINI_API_KEY: ${{ secrets.GEMINI_API_KEY }}
 
       - name: Setup Pages
         uses: actions/configure-pages@v4
