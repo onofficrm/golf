@@ -2,9 +2,9 @@ import React from 'react';
 import { 
   Home, ShoppingBag, MessageCircle, Star, User as UserIcon, 
   MapPin, Calendar, Users, DollarSign, Plus, X, Search, Coins,
-  Sparkles, Crown, Timer, Heart, Trophy
+  Sparkles, Crown, Timer, Heart, Trophy, ThumbsUp
 } from 'lucide-react';
-import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, MAX_FREE_JOINS, JOIN_COST_POINTS } from '../types';
+import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, TopMember, MAX_FREE_JOINS, JOIN_COST_POINTS } from '../types';
 
 // --- Navigation ---
 
@@ -163,7 +163,7 @@ export const JoinCard: React.FC<{ post: JoinPost; onJoin: (post: JoinPost) => vo
 
 export const ManagerProfileCard: React.FC<{ manager: ManagerProfile }> = ({ manager }) => (
   <div className="min-w-[140px] bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col items-center">
-    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-100 mb-2">
+    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-purple-100 mb-2 shadow-sm">
       <img src={manager.image} alt={manager.name} className="w-full h-full object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
     </div>
     <h4 className="font-bold text-sm text-gray-900">{manager.name}</h4>
@@ -178,6 +178,24 @@ export const ManagerProfileCard: React.FC<{ manager: ManagerProfile }> = ({ mana
        <Star size={10} className="text-yellow-400 fill-yellow-400" />
        <span>{manager.rating}</span>
     </div>
+  </div>
+);
+
+export const TopMemberCard: React.FC<{ member: TopMember }> = ({ member }) => (
+  <div className="min-w-[130px] bg-white rounded-xl p-3 border border-gray-100 shadow-sm flex flex-col items-center">
+    <div className="w-16 h-16 rounded-full overflow-hidden border-2 border-primary-100 mb-2 shadow-sm relative">
+      <img src={member.avatar} alt={member.name} className="w-full h-full object-cover" crossOrigin="anonymous" referrerPolicy="no-referrer" />
+      <div className="absolute bottom-0 right-0 bg-white rounded-full p-0.5 border border-gray-100 shadow-sm">
+         <ThumbsUp size={12} className="text-primary-600 fill-primary-100" />
+      </div>
+    </div>
+    <h4 className="font-bold text-sm text-gray-900">{member.name}</h4>
+    <span className="text-[10px] text-primary-700 bg-primary-50 px-2 py-0.5 rounded-full mt-1 mb-1 font-medium border border-primary-100">
+      {member.badge}
+    </span>
+    <p className="text-[10px] text-gray-400 text-center line-clamp-1 w-full">
+      {member.description}
+    </p>
   </div>
 );
 
