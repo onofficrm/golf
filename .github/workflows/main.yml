@@ -20,10 +20,10 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: 20
-          # 에러 원인이었던 cache: 'npm' 줄을 삭제했습니다.
+          # 에러의 원인이었던 cache 설정을 삭제했습니다.
 
       - name: Install dependencies
-        # package-lock.json이 없을 때 발생할 수 있는 충돌을 방지합니다.
+        # package-lock.json 파일이 없어도 에러 없이 설치하도록 설정합니다.
         run: npm install --legacy-peer-deps
 
       - name: Build
