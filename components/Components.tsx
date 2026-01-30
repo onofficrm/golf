@@ -61,6 +61,29 @@ export const Header: React.FC<{ user: User; title: string; onCharge: () => void 
   </div>
 );
 
+// --- UI Helpers ---
+
+export const StarRating: React.FC<{ rating: number; max?: number; size?: number; setRating?: (r: number) => void }> = ({ rating, max = 5, size = 16, setRating }) => {
+  return (
+    <div className="flex gap-1">
+      {[...Array(max)].map((_, i) => (
+        <button 
+          key={i} 
+          type="button"
+          disabled={!setRating}
+          onClick={() => setRating && setRating(i + 1)}
+          className={`${setRating ? 'cursor-pointer hover:scale-110 transition-transform' : 'cursor-default'}`}
+        >
+          <Star 
+            size={size} 
+            className={`${i < rating ? 'text-yellow-400 fill-yellow-400' : 'text-gray-300 fill-gray-100'}`} 
+          />
+        </button>
+      ))}
+    </div>
+  );
+};
+
 // --- Cards ---
 
 export const JoinCard: React.FC<{ post: JoinPost; onJoin: (post: JoinPost) => void }> = ({ post, onJoin }) => (
@@ -190,8 +213,11 @@ export const MarketCard: React.FC<{ item: MarketItem }> = ({ item }) => {
   );
 };
 
-export const CommunityCard: React.FC<{ post: Post }> = ({ post }) => (
-  <div className="bg-white p-4 border-b border-gray-100 last:border-0">
+export const CommunityCard: React.FC<{ post: Post; onClick?: () => void }> = ({ post, onClick }) => (
+  <div 
+    onClick={onClick} 
+    className={`bg-white p-4 border-b border-gray-100 last:border-0 ${onClick ? 'cursor-pointer hover:bg-gray-50 transition-colors' : ''}`}
+  >
     <div className="flex gap-2 items-center mb-2">
       <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
         post.type === 'review' ? 'bg-orange-100 text-orange-600' : 'bg-blue-50 text-blue-600'
@@ -199,9 +225,8 @@ export const CommunityCard: React.FC<{ post: Post }> = ({ post }) => (
         {post.type === 'review' ? '후기' : '자유'}
       </span>
       {post.rating && (
-        <div className="flex items-center gap-0.5 text-yellow-400">
-          <Star size={12} fill="currentColor" />
-          <span className="text-xs font-bold text-gray-600">{post.rating}</span>
+        <div className="flex items-center gap-0.5">
+          <StarRating rating={post.rating} size={12} />
         </div>
       )}
       <span className="text-xs text-gray-400 ml-auto">{post.date}</span>
@@ -211,7 +236,9 @@ export const CommunityCard: React.FC<{ post: Post }> = ({ post }) => (
     <div className="flex items-center justify-between text-xs text-gray-400">
       <span>{post.authorName}</span>
       <div className="flex gap-3">
-        <span className="flex items-center gap-1"><MessageCircle size={12} /> {post.comments}</span>
+        <span className="flex items-center gap-1 text-gray-500">
+          <MessageCircle size={12} /> {post.comments}
+        </span>
       </div>
     </div>
   </div>
