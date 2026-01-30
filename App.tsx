@@ -1,10 +1,10 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, JOIN_COST_POINTS, MAX_FREE_JOINS, REVIEW_REWARD_POINTS } from './types';
+import { ViewState, User, JoinPost, MarketItem, Post, ManagerProfile, JOIN_COST_POINTS, MAX_FREE_JOINS, REVIEW_REWARD_POINTS, Comment } from './types';
 import { 
   MobileNavbar, Header, JoinCard, MarketCard, CommunityCard, 
-  Modal, FloatingActionButton, ManagerProfileCard 
+  Modal, FloatingActionButton, ManagerProfileCard, StarRating
 } from './components/Components';
-import { Plus, Search, CheckCircle, Sparkles, MessageCircle, AlertCircle, Crown, Clock, Heart } from 'lucide-react';
+import { Plus, Search, CheckCircle, Sparkles, MessageCircle, AlertCircle, Crown, Clock, Heart, Send } from 'lucide-react';
 import { askGolfCoach, generatePostHelp } from './services/geminiService';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
@@ -126,16 +126,21 @@ const INITIAL_MARKET: MarketItem[] = [
 ];
 
 const INITIAL_POSTS: Post[] = [
-  { id: 'p1', authorId: 'a1', authorName: '아이언맨', title: '슬라이스 교정 팁 좀 알려주세요', content: '드라이버만 잡으면 우측으로 터지네요 ㅠㅠ 드릴 추천 부탁드립니다.', date: '2시간 전', likes: 5, comments: 12, type: 'general' },
-  { id: 'p2', authorId: 'a2', authorName: '퍼팅여왕', title: '스카이72 오션코스 다녀왔어요', content: '그린 스피드도 빠르고 관리 상태가 너무 좋았습니다. 강추!', date: '1일 전', likes: 24, comments: 3, type: 'review', rating: 5 },
-  { id: 'p3', authorId: 'a3', authorName: '김프로지망생', title: '겨울 골프 복장 질문이요', content: '영하로 떨어진다는데 히트텍 두 개 입으면 스윙 불편할까요? 핫팩 위치 추천 좀 해주세요!', date: '3시간 전', likes: 8, comments: 15, type: 'general' },
-  { id: 'p4', authorId: 'a4', authorName: '주말골퍼', title: '베어크리크 포천 후기입니다', content: '역시 명문이네요. 잔디 상태 최상이고 캐디님도 너무 친절하셨습니다. 재방문의사 200%입니다.', date: '어제', likes: 32, comments: 5, type: 'review', rating: 5 },
-  { id: 'p5', authorId: 'a5', authorName: '비거리왕', title: '드라이버 비거리 20m 늘린 썰', content: '하체 리드에 집중하고 백스윙 때 힘을 뺐더니 갑자기 거리가 늘었네요. 다들 힘 빼세요!', date: '4시간 전', likes: 45, comments: 20, type: 'general' },
-  { id: 'p6', authorId: 'a6', authorName: '야간라운딩', title: '솔트베이 야간 조명 밝나요?', content: '퇴근하고 가보려고 하는데 공 찾기 쉬운지 궁금합니다. 모기는 좀 들어갔나요?', date: '6시간 전', likes: 2, comments: 8, type: 'general' },
-  { id: 'p7', authorId: 'a7', authorName: '보기플레이어', title: '남서울 CC 도전기 (눈물)', content: '그린 난이도가 역시 악명 높네요. 쓰리퍼트 남발하고 왔습니다 ㅠㅠ 멘탈 털렸어요.', date: '2일 전', likes: 15, comments: 7, type: 'review', rating: 3 },
-  { id: 'p8', authorId: 'a8', authorName: '골린이1호', title: '골프존 vs 카카오 스크린', content: '입문자인데 어디가 더 치기 편한가요? 추천 부탁드려요.', date: '오늘', likes: 3, comments: 11, type: 'general' },
-  { id: 'p9', authorId: 'a9', authorName: '장비병환자', title: '타이틀리스트 T100 어떤가요?', content: '중급자용 아이언으로 바꾸려고 하는데 난이도가 많이 어려울까요? 시타 해보신 분?', date: '5시간 전', likes: 6, comments: 4, type: 'general' },
-  { id: 'p10', authorId: 'a10', authorName: '싱글가즈아', title: '가평베네스트 가을 골프 최고네요', content: '단풍 구경 제대로 하고 왔습니다. 코스 관리 상태도 훌륭하고 날씨도 딱 좋았어요.', date: '3일 전', likes: 50, comments: 12, type: 'review', rating: 5 },
+  { id: 'p1', authorId: 'a1', authorName: '아이언맨', title: '슬라이스 교정 팁 좀 알려주세요', content: '드라이버만 잡으면 우측으로 터지네요 ㅠㅠ 드릴 추천 부탁드립니다.', date: '2시간 전', likes: 5, comments: 2, type: 'general', replies: [
+    { id: 'c1', authorName: '레슨프로', content: '그립을 조금 더 강하게 잡아보세요.', date: '1시간 전' },
+    { id: 'c2', authorName: '백돌이', content: '저도 같은 고민입니다..', date: '30분 전' }
+  ] },
+  { id: 'p2', authorId: 'a2', authorName: '퍼팅여왕', title: '스카이72 오션코스 다녀왔어요', content: '그린 스피드도 빠르고 관리 상태가 너무 좋았습니다. 강추!', date: '1일 전', likes: 24, comments: 1, type: 'review', rating: 5, replies: [
+    { id: 'c3', authorName: '가고싶다', content: '부럽네요! 주말에 예약 힘든가요?', date: '어제' }
+  ] },
+  { id: 'p3', authorId: 'a3', authorName: '김프로지망생', title: '겨울 골프 복장 질문이요', content: '영하로 떨어진다는데 히트텍 두 개 입으면 스윙 불편할까요? 핫팩 위치 추천 좀 해주세요!', date: '3시간 전', likes: 8, comments: 0, type: 'general', replies: [] },
+  { id: 'p4', authorId: 'a4', authorName: '주말골퍼', title: '베어크리크 포천 후기입니다', content: '역시 명문이네요. 잔디 상태 최상이고 캐디님도 너무 친절하셨습니다. 재방문의사 200%입니다.', date: '어제', likes: 32, comments: 5, type: 'review', rating: 5, replies: [] },
+  { id: 'p5', authorId: 'a5', authorName: '비거리왕', title: '드라이버 비거리 20m 늘린 썰', content: '하체 리드에 집중하고 백스윙 때 힘을 뺐더니 갑자기 거리가 늘었네요. 다들 힘 빼세요!', date: '4시간 전', likes: 45, comments: 20, type: 'general', replies: [] },
+  { id: 'p6', authorId: 'a6', authorName: '야간라운딩', title: '솔트베이 야간 조명 밝나요?', content: '퇴근하고 가보려고 하는데 공 찾기 쉬운지 궁금합니다. 모기는 좀 들어갔나요?', date: '6시간 전', likes: 2, comments: 8, type: 'general', replies: [] },
+  { id: 'p7', authorId: 'a7', authorName: '보기플레이어', title: '남서울 CC 도전기 (눈물)', content: '그린 난이도가 역시 악명 높네요. 쓰리퍼트 남발하고 왔습니다 ㅠㅠ 멘탈 털렸어요.', date: '2일 전', likes: 15, comments: 7, type: 'review', rating: 3, replies: [] },
+  { id: 'p8', authorId: 'a8', authorName: '골린이1호', title: '골프존 vs 카카오 스크린', content: '입문자인데 어디가 더 치기 편한가요? 추천 부탁드려요.', date: '오늘', likes: 3, comments: 11, type: 'general', replies: [] },
+  { id: 'p9', authorId: 'a9', authorName: '장비병환자', title: '타이틀리스트 T100 어떤가요?', content: '중급자용 아이언으로 바꾸려고 하는데 난이도가 많이 어려울까요? 시타 해보신 분?', date: '5시간 전', likes: 6, comments: 4, type: 'general', replies: [] },
+  { id: 'p10', authorId: 'a10', authorName: '싱글가즈아', title: '가평베네스트 가을 골프 최고네요', content: '단풍 구경 제대로 하고 왔습니다. 코스 관리 상태도 훌륭하고 날씨도 딱 좋았어요.', date: '3일 전', likes: 50, comments: 12, type: 'review', rating: 5, replies: [] },
 ];
 
 type FilterType = 'ALL' | 'URGENT' | 'MANAGER' | 'FEMALE';
@@ -155,12 +160,17 @@ export default function App() {
   const [isChargeModalOpen, setChargeModalOpen] = useState(false);
   const [isPostModalOpen, setPostModalOpen] = useState(false);
   const [selectedJoin, setSelectedJoin] = useState<JoinPost | null>(null);
+  
+  // Post Detail Modal
+  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [commentInput, setCommentInput] = useState('');
 
   // AI & Form State
   const [aiResponse, setAiResponse] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
   const [newPostContent, setNewPostContent] = useState('');
   const [newPostTitle, setNewPostTitle] = useState('');
+  const [newPostRating, setNewPostRating] = useState(5);
 
   // --- Actions ---
 
@@ -214,7 +224,8 @@ export default function App() {
       likes: 0,
       comments: 0,
       type: type,
-      rating: type === 'review' ? 5 : undefined
+      rating: type === 'review' ? newPostRating : undefined,
+      replies: []
     };
 
     setPosts([newPost, ...posts]);
@@ -229,6 +240,35 @@ export default function App() {
     setNewPostTitle('');
     setNewPostContent('');
     setAiResponse('');
+    setNewPostRating(5);
+  };
+
+  const handleAddComment = () => {
+    if (!selectedPost || !commentInput.trim()) return;
+
+    const newComment: Comment = {
+      id: Date.now().toString(),
+      authorName: user.name,
+      content: commentInput,
+      date: '방금 전'
+    };
+
+    const updatedPosts = posts.map(p => {
+      if (p.id === selectedPost.id) {
+        return {
+          ...p,
+          comments: p.comments + 1,
+          replies: [newComment, ...(p.replies || [])]
+        };
+      }
+      return p;
+    });
+
+    setPosts(updatedPosts);
+    // Update currently selected post to reflect changes immediately in modal
+    const updatedSelectedPost = updatedPosts.find(p => p.id === selectedPost.id) || null;
+    setSelectedPost(updatedSelectedPost);
+    setCommentInput('');
   };
 
   const triggerAiHelp = async (context: string) => {
@@ -370,7 +410,7 @@ export default function App() {
       </div>
       <div>
         {posts.filter(p => view === ViewState.REVIEWS ? p.type === 'review' : true).map(post => (
-          <CommunityCard key={post.id} post={post} />
+          <CommunityCard key={post.id} post={post} onClick={() => setSelectedPost(post)} />
         ))}
       </div>
       <FloatingActionButton 
@@ -549,6 +589,13 @@ export default function App() {
             value={newPostTitle}
             onChange={(e) => setNewPostTitle(e.target.value)}
           />
+
+          {view === ViewState.REVIEWS && (
+            <div className="flex items-center gap-2 px-1">
+              <span className="text-sm font-bold text-gray-600">평점:</span>
+              <StarRating rating={newPostRating} setRating={setNewPostRating} size={24} />
+            </div>
+          )}
           
           <div className="relative">
             <textarea 
@@ -575,6 +622,81 @@ export default function App() {
             등록
           </button>
         </div>
+      </Modal>
+
+      {/* Post Detail Modal */}
+      <Modal 
+        isOpen={!!selectedPost} 
+        onClose={() => setSelectedPost(null)} 
+        title={selectedPost?.type === 'review' ? "후기 상세" : "게시글 상세"}
+      >
+        {selectedPost && (
+          <div className="space-y-4">
+             {/* Header */}
+             <div className="flex gap-2 items-center mb-2">
+                <span className={`px-2 py-0.5 rounded text-[10px] font-bold uppercase ${
+                  selectedPost.type === 'review' ? 'bg-orange-100 text-orange-600' : 'bg-blue-50 text-blue-600'
+                }`}>
+                  {selectedPost.type === 'review' ? '후기' : '자유'}
+                </span>
+                <span className="text-sm text-gray-500">{selectedPost.authorName}</span>
+                <span className="text-xs text-gray-400 ml-auto">{selectedPost.date}</span>
+             </div>
+
+             <div className="border-b border-gray-100 pb-4">
+               <h3 className="font-bold text-xl text-gray-900 mb-2">{selectedPost.title}</h3>
+               {selectedPost.rating && (
+                  <div className="flex items-center gap-1 mb-3">
+                    <StarRating rating={selectedPost.rating} size={18} />
+                    <span className="text-sm font-bold text-gray-600 ml-1">{selectedPost.rating}.0</span>
+                  </div>
+               )}
+               <p className="text-gray-700 whitespace-pre-wrap">{selectedPost.content}</p>
+             </div>
+
+             {/* Comments Section */}
+             <div className="bg-gray-50 rounded-xl p-3">
+               <div className="flex items-center gap-1 mb-3 text-sm font-bold text-gray-700">
+                 <MessageCircle size={16} /> 댓글 {selectedPost.comments}
+               </div>
+
+               {/* List */}
+               <div className="space-y-3 mb-4 max-h-[30vh] overflow-y-auto pr-1">
+                 {selectedPost.replies && selectedPost.replies.length > 0 ? (
+                   selectedPost.replies.map(reply => (
+                     <div key={reply.id} className="bg-white p-2.5 rounded-lg border border-gray-200 shadow-sm text-sm">
+                       <div className="flex justify-between items-center mb-1">
+                         <span className="font-bold text-gray-800">{reply.authorName}</span>
+                         <span className="text-xs text-gray-400">{reply.date}</span>
+                       </div>
+                       <p className="text-gray-600">{reply.content}</p>
+                     </div>
+                   ))
+                 ) : (
+                   <p className="text-center text-gray-400 text-xs py-4">첫 댓글을 남겨주세요!</p>
+                 )}
+               </div>
+
+               {/* Input */}
+               <div className="flex gap-2">
+                 <input 
+                   type="text" 
+                   value={commentInput}
+                   onChange={(e) => setCommentInput(e.target.value)}
+                   onKeyPress={(e) => e.key === 'Enter' && handleAddComment()}
+                   placeholder="댓글을 입력하세요..."
+                   className="flex-1 border border-gray-300 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary-500"
+                 />
+                 <button 
+                   onClick={handleAddComment}
+                   className="bg-primary-600 text-white p-2 rounded-lg hover:bg-primary-700 transition-colors"
+                 >
+                   <Send size={16} />
+                 </button>
+               </div>
+             </div>
+          </div>
+        )}
       </Modal>
 
     </div>
